@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>مخزوني وأرباحي</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#14302b">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="مخزوني">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;800&display=swap">
+<style>
+:root{--bg:#eef3f1;--card:#fff;--ink:#14302b;--mute:#5b706b;--line:#d5e0dc;--gain:#0b7a5c;--warn:#b4420f;--btn:#14302b;--btnt:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1b19;--card:#172724;--ink:#e6f1ee;--mute:#93aaa4;--line:#2a3f3b;--gain:#4fd1a5;--warn:#ff9a62;--btn:#e6f1ee;--btnt:#0f1b19;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f1b19;--card:#172724;--ink:#e6f1ee;--mute:#93aaa4;--line:#2a3f3b;--gain:#4fd1a5;--warn:#ff9a62;--btn:#e6f1ee;--btnt:#0f1b19;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Tajawal",Tahoma,Arial,sans-serif;line-height:1.6}
+main{max-width:760px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:1.1rem;margin:0;font-weight:500;color:var(--mute)}
+h2{font-size:1.05rem;margin:0 0 12px;font-weight:800}
+.top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.hero{padding:8px 0 24px}
+.big{font-size:clamp(3rem,16vw,5.5rem);font-weight:800;line-height:1.05;color:var(--gain)}
+.big.neg{color:var(--warn)}
+.big small{font-size:1.1rem;font-weight:500;color:var(--mute);margin-inline-start:8px}
+.stats{display:flex;gap:24px;color:var(--mute);margin-top:6px;flex-wrap:wrap}
+.stats b{color:var(--ink);font-weight:800}
+section{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:16px}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+label{display:flex;flex-direction:column;gap:2px;font-size:.85rem;color:var(--mute);flex:1 1 120px}
+input,select{font:inherit;padding:9px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);width:100%}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--gain);outline-offset:2px}
+button{font:inherit;font-weight:500;padding:9px 16px;border:0;border-radius:6px;background:var(--btn);color:var(--btnt);cursor:pointer}
+button.ghost{background:transparent;color:var(--mute);border:1px solid var(--line);padding:5px 10px;font-size:.85rem}
+.go{align-self:flex-end}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:520px}
+th{font-weight:500;color:var(--mute);font-size:.85rem;text-align:start;padding:6px 8px;border-bottom:1px solid var(--line)}
+td{padding:8px;border-bottom:1px solid var(--line);vertical-align:middle}
+td input{width:64px;padding:5px 6px}
+.low{color:var(--warn);font-weight:800}
+.empty{color:var(--mute);margin:4px 0}
+.sale{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line)}
+.sale:last-child{border-bottom:0}
+.msg{min-height:1.4em;color:var(--warn);font-size:.9rem;margin:8px 0 0}
+@media (prefers-reduced-motion:no-preference){.big{transition:color .2s}}
+</style>
+</head>
+<body>
+<main>
+<div class="top"><h1 id="ptitle">الصافي اليوم</h1><span id="date" class="empty"></span></div>
+<div class="row" style="margin-bottom:12px"><label>الفترة<select id="fp"><option value="day">يوم</option><option value="week">أسبوع</option><option value="month">شهر</option><option value="all">كل الأيام</option></select></label><label>التاريخ<input id="fd" type="date"></label></div>
+<div class="hero">
+  <div class="big" id="profit">0<small>دج</small></div>
+  <div class="stats"><span>ربح المبيعات: <b id="gross">0</b></span><span>المصاريف: <b id="exp">0</b></span><span>مسحوبات العمال: <b id="tk">0</b></span><span>المتبقي بعد المسحوبات: <b id="after">0</b></span><span>السلع المتبقية: <b id="left">0</b></span></div>
+  <div class="stats" style="margin-top:10px"><span>الصافي المتبقي لجميع الأيام (بعد مسحوبات العمال): <b id="allnet">0</b> دج</span></div>
+</div>
+
+<section><h2>ربح كل منتج في الفترة</h2><div class="scroll"><table><thead><tr><th>المنتج</th><th>المباع</th><th>ربح البيع</th><th>الإعلانات</th><th>الصافي</th></tr></thead><tbody id="prl"></tbody></table></div><p class="empty">سجّل مصروف الإعلانات واختر المنتج في قسم المصاريف ليظهر هنا.</p></section>
+
+<section>
+  <h2>تسجيل بيع</h2>
+  <div class="row">
+    <label>المنتج<select id="sp"></select></label>
+    <label>الكمية<input id="sq" type="number" min="1" value="1" inputmode="numeric"></label>
+    <button class="go" id="sell">سجّل البيع</button>
+  </div>
+  <p class="msg" id="smsg" role="status"></p>
+</section>
+
+<section>
+  <h2>المنتجات والمخزون</h2>
+  <div class="scroll"><table>
+    <thead><tr><th>المنتج</th><th>المتبقي</th><th>سعر الشراء</th><th>سعر البيع</th><th>ربح القطعة</th><th>زيادة مخزون</th><th></th></tr></thead>
+    <tbody id="plist"></tbody>
+  </table></div>
+  <p class="empty" id="pempty">لا توجد منتجات بعد. أضف أول منتج بالنموذج أدناه.</p>
+</section>
+
+<section>
+  <h2>إضافة منتج</h2>
+  <div class="row">
+    <label>اسم المنتج<input id="pn" type="text"></label>
+    <label>سعر الشراء<input id="pc" type="number" min="0" step="any" inputmode="decimal"></label>
+    <label>سعر البيع<input id="pp" type="number" min="0" step="any" inputmode="decimal"></label>
+    <label>الكمية الحالية<input id="ps" type="number" min="0" inputmode="numeric"></label>
+    <button class="go" id="padd">أضف المنتج</button>
+  </div>
+  <p class="msg" id="pmsg" role="status"></p>
+</section>
+
+<section>
+  <h2>المصاريف (دولار وغيره)</h2>
+  <div class="row">
+    <label>البيان<input id="el" type="text" placeholder="إعلانات، شحن..."></label>
+    <label>المنتج<select id="ep"></select></label>
+    <label>المبلغ بالدولار<input id="eu" type="number" min="0" step="any" inputmode="decimal"></label>
+    <label>سعر الدولار الواحد (دج)<input id="er" type="number" min="0" step="any" inputmode="decimal"></label>
+    <label>أو مبلغ بالدينار<input id="ed" type="number" min="0" step="any" inputmode="decimal"></label>
+    <button class="go" id="eadd">سجّل المصروف</button>
+  </div>
+  <p class="msg" id="emsg" role="status"></p>
+  <div id="elist"></div>
+</section>
+
+<section>
+  <h2>العمال</h2>
+  <div class="row"><label>اسم العامل<input id="wn" type="text"></label><button class="go" id="wadd">أضف عاملا</button></div>
+  <div class="scroll"><table>
+    <thead><tr><th>العامل</th><th>أخذ في الفترة</th><th>المجموع</th><th>مبلغ جديد</th><th></th></tr></thead>
+    <tbody id="wlist"></tbody>
+  </table></div>
+  <p class="msg" id="wmsg" role="status"></p>
+</section>
+
+<section>
+  <h2>السحب من شركة التوصيل</h2>
+  <p class="empty">يُسجَّل المبلغ يدويا هنا، لأن الربط المباشر بحساب الشركة غير ممكن من هذه الصفحة.</p>
+  <div class="row">
+    <label>المبلغ المسحوب (دج)<input id="dm" type="number" min="0" step="any" inputmode="decimal"></label>
+    <label>صُرف في<select id="dc"><option>شراء سلع</option><option>شراء دولار</option><option>مواد التغليف</option><option>توصيل السلع إلى المحل</option><option>أخرى</option></select></label>
+    <label>ملاحظة<input id="dn" type="text"></label>
+    <button class="go" id="dadd">سجّل السحب</button>
+  </div>
+  <p class="msg" id="dmsg" role="status"></p>
+  <div id="dsum"></div>
+  <div id="dlist"></div>
+</section>
+
+<section>
+  <h2>مبيعات الفترة</h2>
+  <div id="slist"></div>
+  <p class="empty" id="sempty">لا توجد مبيعات في هذه الفترة.</p>
+</section>
+</main>
+
+<script>
+(function(){
+var KEY="stock-profit-v1",S={products:[],sales:[],expenses:[],workers:[],taken:[],wd:[]};
+function load(){try{var r=localStorage.getItem(KEY);if(r){var d=JSON.parse(r);if(d)for(var k in S)if(d[k])S[k]=d[k]}}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function $(i){return document.getElementById(i)}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function ds(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function inR(d,R){return d>=R.a&&d<=R.b}
+function range(){var p=$("fp").value,d=$("fd").value||today();if(p==="all")return{a:"0000",b:"9999",l:"كل الأيام",t:"الصافي لكل الأيام"};if(p==="day")return{a:d,b:d,l:d,t:"الصافي في اليوم"};if(p==="week"){var dt=new Date(d+"T00:00:00"),a=new Date(dt);a.setDate(dt.getDate()-dt.getDay());var e=new Date(a);e.setDate(a.getDate()+6);return{a:ds(a),b:ds(e),l:ds(a)+" ← "+ds(e),t:"الصافي في الأسبوع"}}return{a:d.slice(0,7)+"-01",b:d.slice(0,7)+"-31",l:d.slice(0,7),t:"الصافي في الشهر"}}
+function today(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function n(v){return Math.round(v*100)/100}
+function f(v){return n(v).toLocaleString("ar-DZ",{maximumFractionDigits:2})}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+function render(){
+  var t=today(),R=range(),ts=S.sales.filter(function(s){return inR(s.date,R)});
+  var profit=0,rev=0,q=0;
+  ts.forEach(function(s){profit+=s.qty*(s.price-s.cost);rev+=s.qty*s.price;q+=s.qty});
+  var left=0;S.products.forEach(function(p){left+=p.stock});
+  var tE=S.expenses.filter(function(x){return inR(x.date,R)}),tT=S.taken.filter(function(x){return inR(x.date,R)});
+  var exp=sum(tE,function(x){return x.amount}),tk=sum(tT,function(x){return x.amount}),net=profit-exp;
+  var big=$("profit");big.innerHTML=f(net)+"<small>دج</small>";big.className="big"+(net<0?" neg":"");
+  $("gross").textContent=f(profit);$("exp").textContent=f(exp);$("tk").textContent=f(tk);$("after").textContent=f(net-tk);
+  $("left").textContent=f(left);
+  $("allnet").textContent=f(sum(S.sales,function(s){return s.qty*(s.price-s.cost)})-sum(S.expenses,function(x){return x.amount})-sum(S.taken,function(x){return x.amount}));
+  var m={},gen=0;function g(id,nm){return m[id]||(m[id]={name:nm,q:0,gp:0,ad:0})}
+  ts.forEach(function(s){var o=g(s.pid,s.name);o.q+=s.qty;o.gp+=s.qty*(s.price-s.cost)});
+  tE.forEach(function(x){if(x.pid)g(x.pid,x.pname).ad+=x.amount;else gen+=x.amount});
+  var rows=Object.keys(m).map(function(k){var o=m[k],nt=o.gp-o.ad;return '<tr><td>'+esc(o.name)+'</td><td>'+o.q+'</td><td>'+f(o.gp)+'</td><td>'+f(o.ad)+'</td><td><b class="'+(nt<0?'low':'')+'">'+f(nt)+'</b></td></tr>'}).join("");
+  if(gen)rows+='<tr><td>مصاريف عامة</td><td></td><td></td><td>'+f(gen)+'</td><td><b class="low">'+f(-gen)+'</b></td></tr>';
+  $("prl").innerHTML=rows;
+  var ep=$("ep"),cv=ep.value;ep.innerHTML='<option value="">مصروف عام (بدون منتج)</option>'+S.products.map(function(p){return '<option value="'+p.id+'">'+esc(p.name)+'</option>'}).join("");ep.value=cv;
+  $("date").textContent=R.l;$("ptitle").textContent=R.t;
+  $("elist").innerHTML=tE.slice().reverse().map(function(x){return '<div class="sale"><span>'+esc(x.label)+(x.pname?' — '+esc(x.pname):'')+(x.usd?' ('+f(x.usd)+' $ × '+f(x.rate)+')':'')+'</span><span><b style="color:var(--warn)">'+f(x.amount)+' دج</b> <button class="ghost" data-rm="expenses:'+x.id+'">احذف</button></span></div>'}).join("");
+  $("wlist").innerHTML=S.workers.map(function(w){var a=sum(S.taken.filter(function(x){return x.wid===w.id&&inR(x.date,R)}),function(x){return x.amount}),b=sum(S.taken.filter(function(x){return x.wid===w.id}),function(x){return x.amount});
+    return '<tr><td>'+esc(w.name)+'</td><td>'+f(a)+' دج</td><td>'+f(b)+' دج</td><td><input type="number" min="0" step="any" id="w'+w.id+'" aria-label="المبلغ"></td><td><button class="ghost" data-take="'+w.id+'">سجّل</button> <button class="ghost" data-rm="workers:'+w.id+'">احذف</button></td></tr>'}).join("");
+  var cats={};S.wd.forEach(function(x){cats[x.cat]=(cats[x.cat]||0)+x.amount});
+  $("dsum").innerHTML='<div class="sale"><b>مجموع المسحوب</b><b>'+f(sum(S.wd,function(x){return x.amount}))+' دج</b></div>'+Object.keys(cats).map(function(k){return '<div class="sale"><span>'+esc(k)+'</span><span>'+f(cats[k])+' دج</span></div>'}).join("");
+  $("dlist").innerHTML=S.wd.slice(-8).reverse().map(function(x){return '<div class="sale"><span>'+x.date+' · '+esc(x.cat)+(x.note?' · '+esc(x.note):'')+'</span><span>'+f(x.amount)+' دج <button class="ghost" data-rm="wd:'+x.id+'">احذف</button></span></div>'}).join("");
+  var sel=$("sp"),cur=sel.value;
+  sel.innerHTML=S.products.map(function(p){return '<option value="'+p.id+'">'+esc(p.name)+' (المتبقي: '+p.stock+')</option>'}).join("");
+  if(cur)sel.value=cur;
+  $("pempty").style.display=S.products.length?"none":"block";
+  $("plist").innerHTML=S.products.map(function(p){
+    return '<tr><td>'+esc(p.name)+'</td><td class="'+(p.stock<=3?'low':'')+'">'+p.stock+(p.stock<=3?' (قارب على النفاد)':'')+'</td><td>'+f(p.cost)+'</td><td>'+f(p.price)+'</td><td>'+f(p.price-p.cost)+'</td>'+
+    '<td><div class="row" style="flex-wrap:nowrap"><input type="number" min="1" value="1" id="r'+p.id+'" aria-label="الكمية"><button class="ghost" data-restock="'+p.id+'">زد</button></div></td>'+
+    '<td><button class="ghost" data-del="'+p.id+'">احذف</button></td></tr>'}).join("");
+  $("sempty").style.display=ts.length?"none":"block";
+  $("slist").innerHTML=ts.slice().reverse().map(function(s){
+    return '<div class="sale"><span>'+s.date+' · '+esc(s.name)+' × '+s.qty+'</span><span><b style="color:var(--gain)">'+f(s.qty*(s.price-s.cost))+' دج</b> <button class="ghost" data-undo="'+s.id+'">تراجع</button></span></div>'}).join("");
+}
+function sum(a,fn){var t=0;a.forEach(function(x){t+=fn(x)});return t}
+function find(id){return S.products.filter(function(p){return p.id===id})[0]}
+$("padd").onclick=function(){
+  var name=$("pn").value.trim(),c=parseFloat($("pc").value),p=parseFloat($("pp").value),st=parseInt($("ps").value||"0",10);
+  if(!name||isNaN(c)||isNaN(p)||isNaN(st)||c<0||p<0||st<0){$("pmsg").textContent="اكتب اسم المنتج وسعر الشراء وسعر البيع والكمية.";return}
+  S.products.push({id:uid(),name:name,cost:c,price:p,stock:st});save();
+  ["pn","pc","pp","ps"].forEach(function(i){$(i).value=""});$("pmsg").textContent="";render();
+};
+$("sell").onclick=function(){
+  var p=find($("sp").value),q=parseInt($("sq").value,10);
+  if(!p){$("smsg").textContent="أضف منتجا أولا.";return}
+  if(!q||q<1){$("smsg").textContent="اكتب كمية صحيحة.";return}
+  if(q>p.stock){$("smsg").textContent="الكمية المتبقية من «"+p.name+"» هي "+p.stock+" فقط.";return}
+  p.stock-=q;S.sales.push({id:uid(),pid:p.id,name:p.name,qty:q,cost:p.cost,price:p.price,date:today()});
+  save();$("smsg").textContent="";$("sq").value=1;render();
+};
+$("eadd").onclick=function(){var l=$("el").value.trim(),u=parseFloat($("eu").value),r=parseFloat($("er").value),d=parseFloat($("ed").value),e={id:uid(),label:l,date:today()},pid=$("ep").value;if(pid&&find(pid)){e.pid=pid;e.pname=find(pid).name}
+  if(!l){$("emsg").textContent="اكتب بيان المصروف.";return}
+  if(u>0&&r>0){e.usd=u;e.rate=r;e.amount=u*r}else if(d>0){e.amount=d}else{$("emsg").textContent="اكتب الدولار مع سعره، أو المبلغ بالدينار.";return}
+  S.expenses.push(e);save();["el","eu","er","ed"].forEach(function(i){$(i).value=""});$("emsg").textContent="";render()};
+$("wadd").onclick=function(){var v=$("wn").value.trim();if(!v){$("wmsg").textContent="اكتب اسم العامل.";return}S.workers.push({id:uid(),name:v});save();$("wn").value="";$("wmsg").textContent="";render()};
+$("dadd").onclick=function(){var m=parseFloat($("dm").value);if(!(m>0)){$("dmsg").textContent="اكتب المبلغ المسحوب.";return}S.wd.push({id:uid(),amount:m,cat:$("dc").value,note:$("dn").value.trim(),date:today()});save();$("dm").value="";$("dn").value="";$("dmsg").textContent="";render()};
+document.addEventListener("click",function(e){
+  var t=e.target,id;
+  if(id=t.getAttribute&&t.getAttribute("data-restock")){var p=find(id),v=parseInt($("r"+id).value,10);if(p&&v>0){p.stock+=v;save();render()}}
+  else if(id=t.getAttribute&&t.getAttribute("data-del")){if(confirm("حذف هذا المنتج؟")){S.products=S.products.filter(function(p){return p.id!==id});save();render()}}
+  else if(id=t.getAttribute&&t.getAttribute("data-take")){var v2=parseFloat($("w"+id).value);if(v2>0){S.taken.push({id:uid(),wid:id,amount:v2,date:today()});save();render()}}
+  else if(id=t.getAttribute&&t.getAttribute("data-rm")){var pr=id.split(":");if(confirm("تأكيد الحذف؟")){S[pr[0]]=S[pr[0]].filter(function(x){return x.id!==pr[1]});if(pr[0]==="workers")S.taken=S.taken.filter(function(x){return x.wid!==pr[1]});save();render()}}
+  else if(id=t.getAttribute&&t.getAttribute("data-undo")){
+    var s=S.sales.filter(function(x){return x.id===id})[0];
+    if(s){var p2=find(s.pid);if(p2)p2.stock+=s.qty;S.sales=S.sales.filter(function(x){return x.id!==id});save();render()}
+  }
+});
+$("fd").value=today();$("fp").onchange=$("fd").onchange=render;
+load();render();
+})();
+</script>
+<script>if("serviceWorker"in navigator)window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})</script>
+</body>
+</html>
